@@ -3,15 +3,19 @@ const router = express.Router();
 const s3Controller = require('../controllers/s3Controller');
 const dbController = require('../controllers/dbController');
 
-// Rutas S3 (Archivos)
+// Rutas S3 (Archivos PDF)
 router.get('/s3/:folder', s3Controller.getFilesByFolder);
 
-// Rutas Base de Datos (Pólizas)
-router.get('/polizas/:documento', dbController.consultarPoliza);
+// Rutas Pólizas
 router.post('/polizas', dbController.crearPoliza);
+router.get('/polizas/:socio', dbController.consultarPoliza);
 
-// Rutas Base de Datos (Colillas)
-router.get('/colillas/:socio', dbController.consultarColillas);
+// Rutas Personas (Beneficiarios y Titulares)
+router.post('/personas', dbController.guardarPersona);
+router.delete('/personas/:id', dbController.eliminarPersona);
+
+// Rutas Colillas (Pagos)
 router.post('/colillas', dbController.crearColilla);
+router.get('/colillas/:socio', dbController.consultarColillasSocio);
 
 module.exports = router;
