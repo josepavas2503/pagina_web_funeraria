@@ -31,53 +31,71 @@ async function crearPoliza(e) {
         nombre: document.getElementById('p-nombre').value,
         documento: document.getElementById('p-documento').value,
         fecha_nacimiento: document.getElementById('p-fecha-nac').value,
+        meses_iniciales: document.getElementById('p-meses').value,
         nota: document.getElementById('p-nota').value
     };
     try {
         const res = await fetch('/api/polizas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        if(res.ok) { alert('Póliza y titular creados exitosamente'); e.target.reset(); }
+        if(res.ok) { alert('Proceso exitoso: Póliza, titular y pago inicial registrados.'); e.target.reset(); }
         else { const err = await res.json(); alert('Error: ' + err.error); }
     } catch(err) { alert('Error de conexión'); }
 }
 
-async function consultarPoliza() {
-    const socio = document.getElementById('buscar-socio').value;
-    if(!socio) return;
+async function consultarPoliza(forzarSocio = null) {
+    const parametro = forzarSocio || document.getElementById('buscar-socio').value;
+    if(!parametro) return;
+    
+    // Ocultar modal si viene de una selección forzada
+    document.getElementById('modal-selector-polizas').style.display = 'none';
+
     try {
-        const res = await fetch(`/api/polizas/${socio}`);
-        if(!res.ok) return alert('Póliza no encontrada');
+        const res = await fetch(`/api/polizas/${parametro}`);
+        if(!res.ok) return alert('No se encontraron resultados para ese Socio o Documento.');
         const data = await res.json();
         
+        // Si hay varios resultados (Multiples pólizas para un documento)
+        if (data.multiple) {
+            const ul = document.getElementById('lista-opciones-polizas');
+            ul.innerHTML = '';
+            data.opciones.forEach(op => {
+                const li = document.createElement('li');
+                li.style.marginBottom = '10px';
+                li.innerHTML = `<button class="btn-small" onclick="consultarPoliza('${op.socio}')" style="width:100%;">Abrir Póliza N° ${op.socio}</button>`;
+                ul.appendChild(li);
+            });
+            document.getElementById('modal-selector-polizas').style.display = 'block';
+            return; // Se detiene aquí esperando que el usuario elija
+        }
+
+        // Si solo hay un resultado, cargamos todo normal
         socioActualGlobal = data.poliza.socio;
         document.getElementById('detalle-poliza-container').style.display = 'block';
         
-        // Llenar datos cabecera
         document.getElementById('lbl-socio').textContent = data.poliza.socio;
         document.getElementById('lbl-telefono').textContent = data.poliza.telefono || 'N/A';
         document.getElementById('lbl-valormes').textContent = data.poliza.valor_mes;
         document.getElementById('lbl-nota').textContent = data.poliza.nota || 'Sin notas';
 
-        // Llenar último pago
         const lblPago = document.getElementById('lbl-ultimopago');
         if(data.ultimo_pago) {
-            lblPago.innerHTML = `Pagó <b>$${data.ultimo_pago.valor}</b> el <b>${new Date(data.ultimo_pago.fecha).toLocaleDateString()}</b> (Período: ${new Date(data.ultimo_pago.fecha_desde).toLocaleDateString()} al ${new Date(data.ultimo_pago.fecha_hasta).toLocaleDateString()})`;
+            lblPago.innerHTML = `Última colilla (#${data.ultimo_pago.id}): <b>$${data.ultimo_pago.valor}</b> el <b>${new Date(data.ultimo_pago.fecha).toLocaleDateString()}</b>.`;
         } else {
-            lblPago.textContent = "No hay pagos registrados para esta póliza.";
+            lblPago.textContent = "No hay pagos registrados.";
         }
 
-        // Llenar tabla personas
         const tbody = document.querySelector('#tabla-personas tbody');
         tbody.innerHTML = '';
         data.personas.forEach(p => {
             const tr = document.createElement('tr');
+            // Las variables p.mayor_65 y p.mayor_70 vienen de la DB calculadas!
             tr.innerHTML = `
-                <td>${p.nombre}</td>
+                <td>${p.nombre} <br><small style="color:gray;">${p.mayor_70 ? 'Mayor 70' : (p.mayor_65 ? 'Mayor 65' : 'Menor 65')}</small></td>
                 <td>${p.documento || ''}</td>
-                <td>${p.titular ? '<b>Sí</b>' : 'No'}</td>
-                <td>${p.fallecio ? 'Sí' : 'No'}</td>
+                <td style="text-align:center;">${p.titular ? '<span style="color:green; font-weight:bold;">★ Sí</span>' : 'No'}</td>
+                <td>${p.fallecio ? '<b style="color:red;">Sí</b>' : 'No'}</td>
                 <td>
                     <button class="btn-small" onclick='abrirModalEdicion(${JSON.stringify(p)}, "${data.poliza.telefono || ''}")'>Editar</button>
-                    <button class="btn-danger" onclick="eliminarPersona(${p.id})">Eliminar</button>
+                    <button class="btn-danger" onclick="eliminarPersona(${p.id})">Borrar</button>
                 </td>
             `;
             tbody.appendChild(tr);

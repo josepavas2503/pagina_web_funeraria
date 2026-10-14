@@ -37,9 +37,10 @@
         <div id="polizas-consultar" class="sub-view active">
             <h3>Consultar Póliza</h3>
             <div class="form-group row">
-                <input type="number" id="buscar-socio" placeholder="N° de Socio" required>
-                <button onclick="consultarPoliza()">Buscar Póliza</button>
+                <input type="text" id="buscar-socio" placeholder="N° de Socio o Documento" required>
+                <button onclick="consultarPoliza()">Buscar</button>
             </div>
+            <!-- (...) Deja el div de detalle-poliza-container intacto como estaba en el mensaje anterior -->
             
             <div id="detalle-poliza-container" style="display:none; margin-top:20px;">
                 <div class="info-box">
@@ -69,25 +70,30 @@
             </div>
         </div>
 
-        <!-- Crear Póliza -->
+<!-- Crear Póliza -->
         <div id="polizas-crear" class="sub-view">
-            <h3>Crear Nueva Póliza</h3>
+            <h3>Crear Nueva Póliza y Pago Inicial</h3>
             <form onsubmit="crearPoliza(event)" class="crud-form">
                 <div class="grid-2">
                     <input type="number" id="p-socio" placeholder="N° de Socio (ID Póliza)" required>
                     <input type="number" id="p-valor" placeholder="Valor Mes ($)" required>
                     <input type="text" id="p-telefono" placeholder="Teléfono de Contacto">
-                    <input type="text" id="p-usuario" placeholder="Usuario Creador" required>
+                    <input type="text" id="p-usuario" placeholder="Usuario Cajero" required>
                 </div>
                 <hr>
-                <h4>Datos del Titular</h4>
+                <h4>Datos del Titular Principal</h4>
                 <div class="grid-2">
                     <input type="text" id="p-nombre" placeholder="Nombre Completo del Titular" required>
                     <input type="text" id="p-documento" placeholder="Documento de Identidad" required>
                     <input type="date" id="p-fecha-nac" required title="Fecha de Nacimiento">
                 </div>
+                <hr>
+                <h4>Pago Obligatorio de Apertura</h4>
+                <div class="grid-2">
+                    <input type="number" id="p-meses" placeholder="Cantidad de Meses a Pagar" min="1" required>
+                </div>
                 <textarea id="p-nota" placeholder="Notas sobre la póliza..."></textarea>
-                <button type="submit" class="btn-guardar">Registrar Póliza y Titular</button>
+                <button type="submit" class="btn-guardar">Registrar Póliza y Generar Colilla</button>
             </form>
         </div>
 
