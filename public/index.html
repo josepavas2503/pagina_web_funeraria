@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión - Funeraria</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <h1>Sistema de Gestión</h1>
+        </div>
+        <div class="nav-links">
+            <button onclick="showView('menu')" id="btn-menu" class="active">Inicio</button>
+            <button onclick="showView('polizas')" id="btn-polizas">Pólizas</button>
+            <button onclick="showView('colillas')" id="btn-colillas">Colillas (Pagos)</button>
+        </div>
+    </header>
+
+    <!-- MENÚ PRINCIPAL -->
+    <div id="view-menu" class="view active">
+        <div class="intro-box">
+            <h2>Panel de Administración</h2>
+            <p>Seleccione un módulo en la parte superior para gestionar pólizas, registrar pagos (colillas) o visualizar los documentos PDF almacenados en la nube.</p>
+        </div>
+    </div>
+
+    <!-- MÓDULO PÓLIZAS -->
+    <div id="view-polizas" class="view">
+        <div class="sub-nav">
+            <button onclick="showSubView('polizas-consultar')">Consultar / Modificar</button>
+            <button onclick="showSubView('polizas-crear')">Crear Póliza</button>
+            <button onclick="showSubView('polizas-archivos')">Ver Archivos (S3)</button>
+        </div>
+
+        <div id="polizas-consultar" class="sub-view active">
+            <h3>Consultar Póliza</h3>
+            <div class="form-group">
+                <input type="text" id="buscar-documento" placeholder="Número de Documento">
+                <button onclick="consultarPoliza()">Buscar</button>
+            </div>
+            <div id="resultado-poliza" class="resultado-box"></div>
+        </div>
+
+        <div id="polizas-crear" class="sub-view">
+            <h3>Crear Nueva Póliza</h3>
+            <form onsubmit="crearPoliza(event)" class="crud-form">
+                <input type="text" id="p-socio" placeholder="Socio" required>
+                <input type="text" id="p-nombre" placeholder="Nombre Completo" required>
+                <input type="text" id="p-documento" placeholder="Documento" required>
+                <input type="date" id="p-fecha-nac" required>
+                <input type="text" id="p-telefono" placeholder="Teléfono">
+                <input type="text" id="p-titular" placeholder="Titular (Obligatorio)" required>
+                <input type="number" id="p-valor" placeholder="Valor Mensual" required>
+                <textarea id="p-nota" placeholder="Notas adicionales..."></textarea>
+                <button type="submit" class="btn-guardar">Guardar Póliza</button>
+            </form>
+        </div>
+
+        <div id="polizas-archivos" class="sub-view">
+            <h3>Carpeta de Pólizas (S3)</h3>
+            <div class="filter-box">
+                <select id="select-polizas" onchange="displayPdf('select-polizas', 'viewer-polizas')">
+                    <option value="">Cargando documentos...</option>
+                </select>
+            </div>
+            <iframe id="viewer-polizas" src="" class="pdf-viewer" style="display:none;"></iframe>
+        </div>
+    </div>
+
+    <!-- MÓDULO COLILLAS -->
+    <div id="view-colillas" class="view">
+        <div class="sub-nav">
+            <button onclick="showSubView('colillas-consultar')">Consultar Pagos</button>
+            <button onclick="showSubView('colillas-crear')">Crear Colilla</button>
+            <button onclick="showSubView('colillas-archivos')">Ver Archivos (S3)</button>
+        </div>
+
+        <div id="colillas-consultar" class="sub-view active">
+            <h3>Consultar Historial de Pagos</h3>
+            <div class="form-group">
+                <input type="text" id="buscar-socio-colilla" placeholder="Número de Socio">
+                <button onclick="consultarColillas()">Buscar</button>
+            </div>
+            <div id="resultado-colillas" class="resultado-box"></div>
+        </div>
+
+        <div id="colillas-crear" class="sub-view">
+            <h3>Registrar Nuevo Pago</h3>
+            <form onsubmit="crearColilla(event)" class="crud-form">
+                <input type="text" id="c-socio" placeholder="Socio Único" required>
+                <input type="number" id="c-meses" placeholder="Número de Meses" required>
+                <input type="number" id="c-valor" placeholder="Valor Total" required>
+                <button type="submit" class="btn-guardar">Generar Colilla</button>
+            </form>
+        </div>
+
+        <div id="colillas-archivos" class="sub-view">
+            <h3>Carpeta de Colillas (S3)</h3>
+            <div class="filter-box">
+                <select id="select-colillas" onchange="displayPdf('select-colillas', 'viewer-colillas')">
+                    <option value="">Cargando documentos...</option>
+                </select>
+            </div>
+            <iframe id="viewer-colillas" src="" class="pdf-viewer" style="display:none;"></iframe>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
